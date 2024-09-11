@@ -7,10 +7,14 @@ v3.1, 2024-09-09
 Existing codes: https://github.com/RegineWendt/blood-voyager-s
 Regine Wendt <wendt@itm.uni-luebeck.de>
 v1.1, 2019-04-24
+
+
 BVS is a ns-3 module that simulates the global movement of nanobots in the human body. It features a simplified model of a human body’s cardiovascular system to simulate the nanobots’ mobility.
 
 Laurenz Ebner <ebnerlaurenz@gmail.com>
 v2.1, 2024-02-12
+
+
 BVS v2.1 introduces the possibility to model the communication channel, between the nanobots and the gateways, which would in real apllications be situated at the skin level and is in simulation a synthetic data generator for database usage. The mobility model is left unchanged, but we added multiple modules to measure, transmit and receive data. 
 
 To enhance the realism of existing BVS, BVS-Bio introduces multiple classes to integrate the source of infection, release biomarkers from the infection, and mobility of the biomarkers. 
