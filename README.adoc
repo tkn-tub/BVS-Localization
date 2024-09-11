@@ -1,4 +1,4 @@
-= BVS-Net: An ns-3 Extension of BloodVoyager Simulator to Simulate Intra-Body Nano-Communication in Human Cardiovascular System
+= BVS-Bio: An ns-3 Extension of BloodVoyager Simulator For Exploring Intra-Body Nano-Communication in Human Cardiovascular System
 Saswati Pal <pal@ccs-labs.org>
 v3.1, 2024-09-09
 
