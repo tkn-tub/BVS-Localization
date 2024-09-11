@@ -59,7 +59,7 @@ The modules also enable communication between biomarkers and on-body gateways th
   - Tracks biomarkers' positions and stream IDs over time, outputting data to CSV files for analysis.  
 
 
-== New Parameters
+== Existing parameters
 
   - tissue thickness
   - Size of symbols of one transmitted package: TESTPACKETSIZE 200
@@ -83,9 +83,6 @@ The modules also enable communication between biomarkers and on-body gateways th
 
         vector<int> PDU_RX; // decoded bit stream of measurement data at gateway
 	
-	
-== Existing parameters
-
   - Number of nanobots `m_numberOfNanobots`
   - Injection vessel `m_injectionVessel [1-94]`
   - Simulation duration in seconds `m_simulationDuration`
