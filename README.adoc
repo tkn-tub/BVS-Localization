@@ -1,6 +1,6 @@
-= Blood Voyager Simulator for Network - BVS-Net: An ns-3 Extension to Simulate Communication in Human Cardiovascular System
+= BVS-Net: An ns-3 Extension to Simulate Communication in Human Cardiovascular System
 Laurenz Ebner <ebnerlaurenz@gmail.com>
-v2.1, 2024-02-12
+v3.1, 2024-02-12
 
 Blood Voyager Simulator for Network
 
@@ -18,7 +18,7 @@ BVS v2.1 introduces the possibility to model the communication channel, between 
 If you are looking for a way to visualize the mobility part of the simulation results please visit the extended github for BVS-VIS. 
 
 
-== New Features
+== LocateInfectionSource Method:
  
   - Models a terahertz channel transmission between nanobots and gateway 
   - Outputs the received packages into a csv file (gateway.csv)
