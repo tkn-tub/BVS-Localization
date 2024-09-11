@@ -1,39 +1,64 @@
-= BVS-Net: An ns-3 Extension to Simulate Communication in Human Cardiovascular System
-Laurenz Ebner <ebnerlaurenz@gmail.com>
-v3.1, 2024-02-12
-
-Blood Voyager Simulator for Network
-
+= BVS-Net: An ns-3 Extension of BloodVoyager Simulator to Simulate Intra-Body Nano-Communication in Human Cardiovascular System
+Saswati Pal <pal@ccs-labs.org>
+v3.1, 2024-09-09
 
 == Introduction
 
-Existing code: https://github.com/RegineWendt/blood-voyager-s
+Existing codes: https://github.com/RegineWendt/blood-voyager-s
 Regine Wendt <wendt@itm.uni-luebeck.de>
 v1.1, 2019-04-24
+BVS is a ns-3 module that simulates the global movement of nanobots in the human body. It features a simplified model of a human body’s cardiovascular system to simulate the nanobots’ mobility.
 
-BVS is a ns-3 module that simulates the global movement of objects in the human body. It’s main purpose is to model the work environment of medical nanobots. The simulation of nanobots in their working environment is crucial to promote their application in the medical context. Several simulators for nanonetworks investigate new communication paradigms at nanoscale. However, the influence of the environment, namely the human body, on the movement and communication of nanobots was rarely considered so far. Currently there are three open-source nanonetwork ns-3 extension, namely https://telematics.poliba.it/index.php?option=com_content&view=article&id=30&Itemid=204&lang=en[NanoSim], https://github.com/ieee-p1906-1-reference-code/p1906-dev[p1906] and https://ubnano.tech/nano_downloads/terasim/[TeraSim] that are readily usable. We propose the combination of one of those, or your own nanonetwork simulators with BVS. Our simulator is in a prototypical state at the moment and we’re consistently working on it’s development. At the moment it features a simplified model of a human body’s cardiovascular system to simulate the nanobots’ mobility. Feel free to use BVS and contact us for any remark or contribute to our code. Be sure to have also read our paper describing it.
-
+Laurenz Ebner <ebnerlaurenz@gmail.com>
+v2.1, 2024-02-12
 BVS v2.1 introduces the possibility to model the communication channel, between the nanobots and the gateways, which would in real apllications be situated at the skin level and is in simulation a synthetic data generator for database usage. The mobility model is left unchanged, but we added multiple modules to measure, transmit and receive data. 
 
-If you are looking for a way to visualize the mobility part of the simulation results please visit the extended github for BVS-VIS. 
+To enhance the realism of existing BVS, BVS-Bio introduces multiple classes to integrate the source of infection, release biomarkers from the infection, and mobility of the biomarkers. 
+The modules also enable communication between biomarkers and on-body gateways through a network device. It further facilitates interactions with nanobots.
 
 
 == LocateInfectionSource Method:
  
-  - Models a terahertz channel transmission between nanobots and gateway 
-  - Outputs the received packages into a csv file (gateway.csv)
-  - Calculates the bit error and package error rate per transmission (gateway_ber.csv)
-  - Possibility to have a single run or a multi parameter sweep with respect to tissue thickness.
+  - Simulates the release of biomarkers from an infection source within a blood vessel
+  - Triggers initial biomarker release and schedules continuous releases at 1-second intervals during the simulation.
 
 
-== Existing features
+== releaseBiomarkers Method:
     
-  - 3D coordinates of major vessels and organs
-  - Simulates permanent movement of nanobots in cardiovascular system
-  - Injection of nanobots in specific vessels
-  - Provides global position data of nanobots (/ns-3.2x/csvNano.csv)
-  - easy data analysis with provided MATLAB files 
-  
+  - Handles the generation and distribution of biomarkers in the bloodstream
+  - Creates a BiomarkerChannel for communication between biomarkers and nanobots.
+
+
+== Biomarker Class:
+    
+  - Models biomarker entities, managing their properties, behaviors, and interactions within the BVS.
+  - Manages the lifecycle, positioning, and network communication of biomarkers using BiomarkerNetDevice.
+
+== Bloodstream Class:
+    
+  - Manages a collection of biomarkers within the bloodstream.
+  - Provides methods to add, remove, and count biomarkers.
+
+== BiomarkerChannel Class:
+    
+  - Manages communication between biomarkers and nanobots within a blood vessel.
+  - Handles the transmission of data packets from biomarkers to nanobots using NanoNetDevice.
+  - Facilitates the detection of nanobots within range and ensures correct data exchange.
+
+
+== BiomarkerNetDevice Class:
+
+  - Implements a network device to enable communication between biomarkers and nanobots.
+  - Associates biomarkers with communication channels and manages data packet transmission.
+  - Verifies biomarker associations and manages network addresses and channels.
+
+
+== PrintBiomarkers Class:
+
+  - Logs biomarkers detected at the gateways positioned at various body locations (heart, left arm, right arm, left hip, right hip).
+  - Tracks biomarkers' positions and stream IDs over time, outputting data to CSV files for analysis.  
+
+
 == New Parameters
 
   - tissue thickness
