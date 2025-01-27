@@ -18,11 +18,11 @@
  */
 
 #include "Bloodcircuit.h"
-
+#include "ns3/Biomarker.h" 
 #include "BiomarkerNetDevice.h"
 #include "BiomarkerChannel.h"
 #include "PrintBiomarkers.h"
-
+#include "ns3/log.h"
 #include "Constants.h"
 #include <sstream>
 #include <iomanip>
@@ -33,6 +33,7 @@
 #include <cstdlib> // For srand and rand functions
 #include <ctime>
 #include <bitset> 
+#include <cassert>  // Add this line
 #include <chrono>
 #include <thread>
 
@@ -41,6 +42,9 @@
  */
 
 namespace ns3 {
+
+std::vector<Ptr<Biomarker>> Bloodcircuit::m_allBiomarkers;
+std::unordered_set<std::string> processedBiomarkers;
 
 Bloodcircuit::Bloodcircuit (unsigned int simulationDuration, unsigned int numberOfNanobots, unsigned int injectionVessel, Ptr<PrintNanobots> printer, Ptr<PrintBiomarkers> printBio, 
  std::vector<int> gatewayPositions, std::vector<int> tissue_ID, float vesselthickness, std::vector<int> infection_source_vessel_ID)
@@ -126,11 +130,13 @@ Starter (Ptr<Bloodvessel> vessel)
 
 int
 Bloodcircuit::BeginnSimulation (unsigned int simulationDuration, unsigned int numOfNanobots, unsigned int injectionVessel, std::vector<int> gatewayPositions, std::vector<int> tissue_ID, float vesselthickness, 
- std::vector<int> infection_source_vessel_ID)
+ std::vector<int> infection_source_vessel_ID, bool isDeterministic)
 {
   //execution time
   clock_t start, finish;
   start = clock ();
+  Randomizer::InitRandomizer(isDeterministic);
+
   Ptr<PrintNanobots> printNano = new PrintNanobots (); 
   Ptr<PrintBiomarkers> printBio = new PrintBiomarkers();  // EDIT..................... 
   // Record start time
@@ -210,7 +216,8 @@ void
 Bloodcircuit::InjectNanobots (int numberOfNanobots, Ptr<Bloodvessel> bloodvessel,std::vector<int> gatewayPositions, std::vector<int> tissue_ID, float vesselthickness)
 {
   int nanobotGroupSize = 10;
-  Ptr<UniformRandomVariable> distribute_randomly = bloodvessel->getRandomObjectBetween (0, bloodvessel->GetNumberOfStreams ());
+  Ptr<UniformRandomVariable> distribute_randomly = Randomizer::GetNewRandomStream(0, bloodvessel->GetNumberOfStreams());
+  // bloodvessel->getRandomObjectBetween (0, bloodvessel->GetNumberOfStreams ());
   Vector m_coordinateStart = bloodvessel->GetStartPositionBloodvessel ();
   int intervall =
       (numberOfNanobots >= nanobotGroupSize) //IF if equal or more than 10 Nanobots are injected,
@@ -283,7 +290,11 @@ void Bloodcircuit::LocateInfectionSource(unsigned int simulationDuration, Ptr<Bl
     {
         Simulator::Schedule(Seconds(time), &Bloodcircuit::releaseBiomarkers, bloodvessel, m_direction, biomarkerType, sourceData);    
     }   
+    // Schedule the first decay check
+    cout << "......... Scheduling first decay check ........."  << endl;   
+    Simulator::Schedule(Seconds(1.0), [this]() { this->PerformDecayCheck(); });    
 }
+
 
 void Bloodcircuit::releaseBiomarkers(Ptr<Bloodvessel> bloodvessel, Vector m_direction, std::string biomarkerType, std::string sourceData) 
 {    
@@ -291,16 +302,15 @@ void Bloodcircuit::releaseBiomarkers(Ptr<Bloodvessel> bloodvessel, Vector m_dire
       std::mt19937 gen(rd()); // Mersenne Twister engine initialized with rd()
       std::uniform_int_distribution<> dis(10, 50); // Define the range (1000, 5000)
 
-      int burstIntensity = 100; // dis(gen); // Generate the random number            
+      int burstIntensity = 100; // dis(gen); // Generate the random number       
   
       // Biomarker group size (optional for distribution)
-      int biomarkerGroupSize = 4;
+      int biomarkerGroupSize = 10;
       // Initialize random number generator for stream selection
-      Ptr<UniformRandomVariable> distributeRandomly = bloodvessel->getRandomObjectBetween(0, bloodvessel->GetNumberOfStreams());
+      Ptr<UniformRandomVariable> distributeRandomly = Randomizer::GetNewRandomStream(0, bloodvessel->GetNumberOfStreams());
+      // bloodvessel->getRandomObjectBetween(0, bloodvessel->GetNumberOfStreams());
       // Get the start position of the blood vessel
       Vector m_coordinateStart = bloodvessel->GetStartPositionBloodvessel(); 
-
-      // std::cout << "m_direction: " << m_direction << std::endl;
 
       // Calculate interval for biomarker distribution (if grouping)
       int interval = (burstIntensity >= biomarkerGroupSize) 
@@ -333,7 +343,7 @@ void Bloodcircuit::releaseBiomarkers(Ptr<Bloodvessel> bloodvessel, Vector m_dire
       for (int i = 0; i < burstIntensity; i++) 
       {
           group = (i - 1) / interval; // Determine the group for the biomarker
-          ///Ptr<Biomarker> biomarker = CreateObject<Biomarker>();
+          ///Creating biomarker object ---> Biomarker.cc
           Ptr<Biomarker> temp_bm = CreateObject<Biomarker>(); 
 
           // Construct the unique ID as a string (id+time)
@@ -352,7 +362,7 @@ void Bloodcircuit::releaseBiomarkers(Ptr<Bloodvessel> bloodvessel, Vector m_dire
           temp_bm->SetSourceData(sourceData); // Store the source data in the biomarker
 
           // Install a network device for the biomarker
-          temp_bm->InstallBiomarkerNetDevice(biomarkerChannel);
+          temp_bm->InstallBiomarkerNetDevice(biomarkerChannel);       
           
           // Get random stream number
           int dr = floor(distributeRandomly->GetValue());
@@ -364,16 +374,110 @@ void Bloodcircuit::releaseBiomarkers(Ptr<Bloodvessel> bloodvessel, Vector m_dire
               m_coordinateStart.y + (directionInterval.y * group),
               m_coordinateStart.z + (directionInterval.z * group)
           ));
+
+          // Add biomarker to the global tracker
+          m_allBiomarkers.push_back(temp_bm);  
+
           // std::cout << "Released biomarker from InfectionSource into random stream number: " << dr << " biomarker pos: " << temp_bm << std::endl;
           // Add biomarker to the bloodstream
           bloodvessel->AddBiomarkerToStream(dr, temp_bm);
       }
-      std::cout << "Finished releasing " << burstIntensity << " biomarkers from the vesselID: " << bloodvessel->GetbloodvesselID() << std::endl;
+
+      std::cout << "Finished releasing " << burstIntensity << " biomarkers from the vesselID: " << bloodvessel->GetbloodvesselID() << std::endl;  
+      
       // Record time of releasing biomarkers
       double elapsedTime = Simulator::Now().GetSeconds(); // Get time in seconds
       std::cout << "Simulation Time now: " << elapsedTime << " seconds" << std::endl;
       // EDIT .....................    //
       bloodvessel->PrintBiomarkersOfVessel();    
+}
+
+void Bloodcircuit::PerformDecayCheck() {
+    std::random_device rd;  // Random number generator
+    std::mt19937 gen(rd()); // Mersenne Twister engine for randomness
+
+
+    double currentTime = Simulator::Now().GetSeconds();
+    // decay rates r: 1-0.0014, 3-0.0046, 4-0.2302.
+    double decayRate = 0.007;  // Define decay rate
+    // size_t biomarkersToDecay = static_cast<size_t>(m_allBiomarkers.size() * decayRate);
+
+
+    double dt = 1.0;    // Time step in seconds
+
+    // Calculate how many biomarkers decay this step:
+    size_t biomarkersToDecay = static_cast<size_t>(
+        m_allBiomarkers.size() * (1.0 - std::exp(-decayRate * dt))
+    );
+
+    // Initial log for decay process    // Log for debugging
+    std::cout << "Decay check at time: " << currentTime
+              << " | Total Biomarkers: " << m_allBiomarkers.size()
+              << " | To Decay: " << biomarkersToDecay << std::endl;
+          
+    // Loop to decay biomarkers
+    size_t decayedCount = 0;  // Track the number of biomarkers successfully decayed
+
+    while (decayedCount < biomarkersToDecay) { 
+    // Step 1: Check if there are blood vessels
+    if (m_bloodvessels.empty()) {
+        //std::cout << "No blood vessels available for decay." << std::endl;
+        break;  // Exit if no blood vessels exist
+    }
+
+    // Step 2: Select a random blood vessel
+    std::uniform_int_distribution<size_t> vesselDist(0, m_bloodvessels.size() - 1);
+    size_t randomVesselIndex = vesselDist(gen);
+    auto randomVessel = std::next(m_bloodvessels.begin(), randomVesselIndex)->second;
+
+    if (randomVessel->GetNumberOfStreams() == 0) {
+        //std::cout << "No streams available in vessel ID: " << randomVessel->GetbloodvesselID() << std::endl;
+        continue;  // Skip if no streams exist
+    }
+
+    // Step 3: Select a random stream within the blood vessel
+    std::uniform_int_distribution<int> streamDist(0, randomVessel->GetNumberOfStreams() - 1);
+    int randomStreamIndex = streamDist(gen);
+    auto randomStream = randomVessel->GetStream(randomStreamIndex);
+
+    if (randomStream->AreBiomarkersEmpty()) {
+        std::cout << "No biomarkers available in stream for decay." << std::endl;
+        continue;  // Skip to the next stream
+    }
+
+    // Step 4: Select a random biomarker from the stream
+    int biomarkerIndex = rand() % randomStream->CountBiomarkers();
+    Ptr<Biomarker> biomarker = randomStream->GetBiomarker(biomarkerIndex);
+
+    // Step 5: Check if the biomarker has already been processed
+    if (processedBiomarkers.count(biomarker->GetBiomarkerID())) {
+        continue;  // Skip already-processed biomarkers
+    }
+    processedBiomarkers.insert(biomarker->GetBiomarkerID());
+
+    // Step 6: Remove the biomarker from the stream
+    randomStream->RemoveBiomarker(biomarker);
+    //std::cout << "Removed Biomarker ID: " << biomarker->GetBiomarkerID()
+              //<< " from stream in Vessel ID: " << randomVessel->GetbloodvesselID() << std::endl;
+
+    // Step 7: Remove the biomarker from the centralized list
+    m_allBiomarkers.erase(
+        std::remove(m_allBiomarkers.begin(), m_allBiomarkers.end(), biomarker),
+        m_allBiomarkers.end()
+    );
+
+    // Debug: Ensure centralized list and stream are synchronized
+    if (std::find(m_allBiomarkers.begin(), m_allBiomarkers.end(), biomarker) != m_allBiomarkers.end()) {
+        std::cerr << "Warning: Biomarker ID " << biomarker->GetBiomarkerID() 
+                  << " was not removed from m_allBiomarkers as expected." << std::endl;
+    }
+    decayedCount++;  // Increment the decayed count
+    }
+
+    std::cout << "After Decay: Total Biomarkers Remaining: " << m_allBiomarkers.size() << std::endl;
+
+    // Reschedule the decay check
+    Simulator::Schedule(Seconds(1.0), [this]() { this->PerformDecayCheck(); });
 }
 
 
