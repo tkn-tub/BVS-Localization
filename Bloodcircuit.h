@@ -21,6 +21,7 @@
 #define CLASS_BLOODCIRCUIT_
 
 #include "Bloodvessel.h"
+#include "Randomizer.h"
 
 using namespace std;
 
@@ -72,7 +73,6 @@ private:
   */
   void LocateInfectionSource(unsigned int simulationDuration, Ptr<Bloodvessel> bloodvessel);
 
-
   /**
  * \param type of Bloodvessel
  * \return speed of Bloodvesseltype
@@ -89,9 +89,15 @@ public:
   /// Destructor to clean up the map.
   ~Bloodcircuit ();
 
-  static int BeginnSimulation (unsigned int simulationDuration, unsigned int numOfNanobots, unsigned int injectionVessel, std::vector<int> gatewayPositions, std::vector<int> tissue_ID, float vesselthickness, std::vector<int> infection_source_vessel_ID);
+  static int BeginnSimulation (unsigned int simulationDuration, unsigned int numOfNanobots, unsigned int injectionVessel, std::vector<int> gatewayPositions, std::vector<int> tissue_ID, float vesselthickness, std::vector<int> infection_source_vessel_ID, bool isDeterministic);
+
 
   static void releaseBiomarkers(Ptr<Bloodvessel> bloodvessel, Vector m_direction, std::string biomarkerType, std::string sourceData);
+
+  static std::vector<Ptr<Biomarker>> m_allBiomarkers;
+
+  // Function to check and handle decay
+  void PerformDecayCheck();  // map<int, Ptr<Bloodvessel>>& bloodvessels
 
 };
 }; // namespace ns3

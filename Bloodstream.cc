@@ -20,6 +20,7 @@
 #include "ns3/log.h"
 #include "Bloodstream.h"
 #include "Biomarker.h"
+#include "Bloodcircuit.h"
 
 using namespace std;
 namespace ns3 {
@@ -112,7 +113,12 @@ Ptr<Biomarker> Bloodstream::RemoveBiomarker(int indx) {
 
 Ptr<Biomarker> Bloodstream::RemoveBiomarker (Ptr<Biomarker> biomarker)
 {
+  // Log after the decay process
+  //std::cout << "Biomarker ID is being removed: " << biomarker->GetBiomarkerID() << " from Stream in Vessel ID: " << m_bloodvesselID << std::endl;
   m_biomarkers.remove (biomarker);
+  if (std::find(m_biomarkers.begin(), m_biomarkers.end(), biomarker) != m_biomarkers.end()) {
+    std::cerr << "Error: Biomarker ID: " << biomarker->GetBiomarkerID() << " was not removed properly!" << std::endl;
+  }
   Vector v = biomarker->GetPosition ();
   v.x -= m_offset_x;
   v.y -= m_offset_y;
@@ -131,15 +137,20 @@ void Bloodstream::AddBiomarker(Ptr<Biomarker> biomarker) {
         cout << "In Bloodstream::AddBiomarker: Attempting to add a null biomarker pointer" << "\n";
         return;
     }
+
+    // Add the biomarker to the local bloodstream
     m_biomarkers.push_back(biomarker);
+
     // Update the biomarker's stream ID
     biomarker->SetStream(m_currentStream); 
+
     // Adjust the biomarker's position within the stream
     Vector v = biomarker->GetPosition();
     v.x += m_offset_x;  
     v.y += m_offset_y;
     v.z += m_offset_z;
     biomarker->SetPosition(v);
+
     // Log the addition for debugging purposes:
     // cout <<"In Bloodstream::AddBiomarker added ID " << biomarker->GetBiomarkerID() << "\n";
 }

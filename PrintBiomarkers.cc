@@ -28,14 +28,13 @@
 #include "Constants.h" 
 
 
-using namespace std;
+using namespace std;;
 namespace ns3 {
 
 PrintBiomarkers::PrintBiomarkers() {
-    output.open("csvBio60_18g4.csv", ios::out | ios::trunc); // Open the output CSV file
-    outputM.open("csvBioMob60_18g4.csv", ios::out | ios::trunc);
+    output.open("csvB007_40_20.csv", ios::out | ios::trunc); // Open the output CSV file
+    outputM.open("csvBioM007_40.csv", ios::out | ios::trunc);
 }
-
 PrintBiomarkers::~PrintBiomarkers() {
     output.flush();  // Flush any remaining data to the file
     output.close();  // Close the file
@@ -83,27 +82,27 @@ void PrintBiomarkers::PrintBiomarker(Ptr<Biomarker> b, int vesselID)
     
     if(vesselID == 94){
         seenBiomarkerIds94.insert(id); 
-        cout << "At 94, new biomarker: " << id << "\n";
+        // cout << "At 94, new biomarker: " << id << "\n";
     }
        
     if(vesselID == 75){
         seenBiomarkerIds75.insert(id); 
-        cout << "At 75, new biomarker: " << id << "\n";
+        // cout << "At 75, new biomarker: " << id << "\n";
     }
     
     if(vesselID == 74){ 
         seenBiomarkerIds74.insert(id);
-        //cout << "At ===== 74, new biomarker: " << id << "\n";
+        // cout << "At ===== 74, new biomarker: " << id << "\n";
     }
     
     if(vesselID == 67){
         seenBiomarkerIds67.insert(id); 
-        cout << "At 67, new biomarker: " << id << "\n";
+        // cout << "At 67, new biomarker: " << id << "\n";
     }
     
     if(vesselID == 66){ 
         seenBiomarkerIds66.insert(id);
-        //cout << "At ===== 66, new biomarker: " << id << "\n";
+        // cout << "At ===== 66, new biomarker: " << id << "\n";
     }
         
     // At the end of each simulation second:     

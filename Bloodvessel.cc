@@ -18,6 +18,7 @@
  */
 
 #include "Bloodvessel.h"
+#include "Randomizer.h"
 #include "Constants.h"
 #include <random>
 #include <functional>
@@ -87,6 +88,7 @@ Bloodvessel::Step (Ptr<Bloodvessel> bloodvessel)
       static clock_t now, old = clock ();
       old = now;
       now = clock ();
+      (void)old;  // Suppress unused variable warning
       // cout << (now - old) / 1000000 << " -> " << Simulator::Now () << endl;
 
       // double elapsedTime = Simulator::Now().GetSeconds(); // Get time in seconds
@@ -219,8 +221,10 @@ Bloodvessel::TranslatePosition (double dt)
   list<Ptr<Nanobot>> print;
   list<Ptr<Nanobot>> reachedEnd;
 
-  auto randomVelocityOffset =
-      std::bind (std::uniform_int_distribution<> (0, 11), std::default_random_engine ());
+  // auto randomVelocityOffset = std::bind (std::uniform_int_distribution<> (0, 11), std::default_random_engine ());
+
+  Ptr<UniformRandomVariable> randomVelocityOffset = Randomizer::GetNewRandomStream(0, 11);
+
   // for every stream of the vessel
   for (int i = 0; i < m_numberOfStreams; i++)
     {
@@ -232,7 +236,7 @@ Bloodvessel::TranslatePosition (double dt)
           if (nb->GetTimeStep () < Simulator::Now ())
             {
               // has nanobot reached end after moving
-              if (moveNanobot (nb, i, randomVelocityOffset (), getRandomBoolean (), dt))
+              if (moveNanobot (nb, i, randomVelocityOffset->GetValue(), Randomizer::GetRandomBoolean(), dt))
                 {
                   reachedEnd.push_back (nb);
                 }
@@ -258,7 +262,7 @@ Bloodvessel::ChangeStream ()
 {
   if (m_numberOfStreams > 1)
     {
-      Ptr<UniformRandomVariable> nb_randomize = getRandomObjectBetween (0, m_numberOfStreams);
+      Ptr<UniformRandomVariable> nb_randomize = Randomizer::GetNewRandomStream (0, m_numberOfStreams); // getRandomObjectBetween
       //set half of the nanobots randomly to change
       for (int i = 0; i < m_numberOfStreams; i++)
         {
@@ -336,7 +340,8 @@ Bloodvessel::TransposeNanobots (list<Ptr<Nanobot>> reachedEnd, int stream)
   list<Ptr<Nanobot>> print1;
   list<Ptr<Nanobot>> print2;
   list<Ptr<Nanobot>> reachedEndAgain;
-  Ptr<UniformRandomVariable> rv = getRandomObjectBetween (0, 4);
+  Ptr<UniformRandomVariable> rv = Randomizer::GetNewRandomStream (0, 4); // getRandomObjectBetween
+
   int onetwo;
   for (const Ptr<Nanobot> &botToTranspose : reachedEnd)
     {
@@ -656,7 +661,9 @@ void Bloodvessel::TranslateBiomarkerPosition(double dt)
     std::list<Ptr<Biomarker>> reachedEnd;   // Biomarkers that reached the end of the vessel
     std::list<Ptr<Biomarker>> biomarkersToRemove; // Track biomarkers to remove
     
-  auto randomVelocityOffset = std::bind (std::uniform_int_distribution<> (0, 11), std::default_random_engine ());
+  // auto randomVelocityOffset = std::bind (std::uniform_int_distribution<> (0, 11), std::default_random_engine ());
+  Ptr<UniformRandomVariable> randomVelocityOffset = Randomizer::GetNewRandomStream(0, 11);
+
   // for every stream of the vessel     // Iterate through bloodstreams and biomarkers
     for (int i = 0; i < m_numberOfStreams; i++) {
       // for every biomarker of the stream
@@ -671,7 +678,7 @@ void Bloodvessel::TranslateBiomarkerPosition(double dt)
                     biomarkersToRemove.push_back(bm); 
                 } else {
                     // Move the biomarker if not expired // has biomarker reached end after moving
-                    if (moveBiomarker(bm, i, randomVelocityOffset (), getRandomBoolean(), dt)) { 
+                    if (moveBiomarker(bm, i, randomVelocityOffset->GetValue(), Randomizer::GetRandomBoolean(), dt)) { 
                         reachedEnd.push_back(bm); 
                     } else {
                         print.push_back(bm);
@@ -699,7 +706,8 @@ void Bloodvessel::ChangeBiomarkerStream() {
     // Randomly select half of the biomarkers to change streams
     for (int i = 0; i < m_numberOfStreams; i++) {
       for (uint j = 0; j < m_bloodstreams[i]->CountBiomarkers(); j++) {
-        if (getRandomBoolean()) {
+        // if (getRandomBoolean()) {
+        if (Randomizer::GetRandomBoolean()) {
           m_bloodstreams[i]->GetBiomarker(j)->SetShouldChange(true);
         }
       }
@@ -708,7 +716,8 @@ void Bloodvessel::ChangeBiomarkerStream() {
     // Change streams for biomarkers that are flagged to change
     for (int i = 0; i < m_numberOfStreams; i++) {
       // Special cases for outer streams
-      int direction = (getRandomBoolean()) ? -1 : 1;
+      // int direction = (getRandomBoolean()) ? -1 : 1;
+      int direction = Randomizer::GetRandomBoolean() == true ? -1 : 1;
       if (i == 0) {
         direction = 1;
       } else if (i + 1 >= m_numberOfStreams) {
@@ -799,7 +808,7 @@ void Bloodvessel::TransposeBiomarkers(list<Ptr<Biomarker>> reachedEnd, int strea
     list<Ptr<Biomarker>> reachedEndAgain; // Biomarkers that reach the end of the next vessel
     list<Ptr<Biomarker>> toRemove;      // Biomarkers to be removed due to expiration
 
-    Ptr<UniformRandomVariable> rv = getRandomObjectBetween(0, 4);
+    Ptr<UniformRandomVariable> rv = Randomizer::GetNewRandomStream(0, 4); // getRandomObjectBetween
 
     for (const Ptr<Biomarker> &biomarkerToTranspose : reachedEnd) {
         int randomChoice = floor(rv->GetValue());
@@ -923,6 +932,7 @@ std::list<int> Bloodvessel::IsNanobotInRange(Ptr<Biomarker> biomarker, double co
     return nearbyNanobotIds; 
 }
 // ........................................
+
 
 void Bloodvessel::AddBiomarkerToStream(int streamID, Ptr<Biomarker> biomarker) 
 {

@@ -56,6 +56,7 @@ private:
     double m_size;         // Size of the biomarker
     string m_type;         // Type of biomarker, linked to infection source
     string m_sourceData;   // Data associated with the infection source
+    double m_decayRate;
 
     Ptr<Bloodvessel> m_bloodvessel;
     int m_stream_bm;        // Stream within the blood vessel where the biomarker is located
@@ -207,6 +208,20 @@ public:
     * \returns the pointer to the installed Netdevice
     */
     Ptr<NetDevice> GetDevice(); 
+
+    /**
+     * \brief Determines if the biomarker should decay based on its decay rate.
+     * \return true if the biomarker should decay, false otherwise.
+     */
+    bool ShouldDecay();
+
+    
+    /**
+    * \param decayRate The rate at which the biomarker decays, expressed as a probability per second.
+    *
+    * Sets the decay rate of the biomarker.
+    */
+    void SetDecayRate(double decayRate);
 
    
     /**

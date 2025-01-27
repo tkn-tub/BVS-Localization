@@ -26,6 +26,7 @@
 #include <list>
 #include "Biomarker.h"
 #include "Nanobot.h"
+#include "Randomizer.h"
 
 using namespace std;
 namespace ns3 {
@@ -152,8 +153,6 @@ private:
 
     // Helper function
     bool AreBiomarkersEmpty(); 
-    // Remove Biomarker from this vessel
-    void RemoveBiomarker(Ptr<Biomarker> biomarker); 
 
 
   //GETTER AND SETTER
@@ -328,13 +327,24 @@ public:
   */
   void PrintBiomarkersOfVessel();
 
-    /**
+  /**
   * \brief Adds a Biomarker object to a specific stream within the Bloodvessel.
   *
   * \param streamID The ID of the stream where the biomarker will be added.
   * \param biomarker A pointer to the Biomarker object to be added.
   */
   void AddBiomarkerToStream(int streamID, Ptr<Biomarker> biomarker); 
+
+/**
+ * \brief Removes a specific biomarker from the blood vessel.
+ *
+ * This function removes the given biomarker from the list of biomarkers in the blood vessel.
+ * It ensures that the biomarker is no longer part of the bloodstream simulation.
+ *
+ * \param biomarker A pointer to the biomarker to be removed.
+ */
+void RemoveBiomarker(Ptr<Biomarker> biomarker);
+
 
 };
 

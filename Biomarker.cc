@@ -38,15 +38,14 @@ Biomarker::Biomarker() {
     m_stream_bm = 0;  
     m_shouldChange = false; 
     m_creationTime = Simulator::Now();  // Set the creation time when the object is instantiated
-    m_activeTime = Seconds(60.0);        // Default active time of 60 seconds (adjust as needed)
-
+    m_activeTime = Seconds(60.0);        // Default lifespan (may still decay sooner)
+    m_decayRate = 0.0;             // Default decay rate
     bm_node = CreateObject<Node>();     // Create a node to hold the biomarker's position
     //enables mobility
     MobilityHelper mobility;
     // mobility.SetMobilityModel("ns3::ConstantPositionMobilityModel"); // GaussMarkovMobilityModel
     mobility.Install(bm_node);
 }
-
 
 Biomarker::~Biomarker() {
     // No specific actions needed in the destructor for now
@@ -59,6 +58,20 @@ string Biomarker::GetBiomarkerID() {
 void Biomarker::SetBiomarkerID(string idbio) { 
     m_biomarkerID = idbio; 
 }
+
+// Edit: Exponential Decay ...................
+void Biomarker::SetDecayRate(double decayRate) {
+    m_decayRate = decayRate;
+}
+
+bool Biomarker::ShouldDecay() {
+    double elapsedTime = Simulator::Now().GetSeconds() - m_creationTime.GetSeconds();
+    double survivalProbability = exp(-m_decayRate * elapsedTime);
+    double randomValue = UniformRandomVariable().GetValue(0.0, 1.0);
+    // Decay if randomValue exceeds survival probability
+    return randomValue > survivalProbability;  // Returns true if biomarker should decay
+}
+// end of edit ...................
 
 double Biomarker::GetSize() { 
     return m_size; 
