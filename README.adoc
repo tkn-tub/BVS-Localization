@@ -13,7 +13,7 @@ Laurenz Ebner <ebnerlaurenz@gmail.com>
 v2.1, 2024-02-12
 BVS v2.1 introduces the possibility to model the communication channel, between the nanobots and the gateways, which would in real apllications be situated at the skin level and is in simulation a synthetic data generator for database usage. The mobility model is left unchanged, but we added multiple modules to measure, transmit and receive data. 
 
-To enhance the realism of existing BVS, **BVS-Bio** introduces multiple classes to integrate the source of infection, release biomarkers from the infection, and mobility of the biomarkers. 
+To enhance the realism of existing BVS, **BVS-Localization** introduces multiple classes to integrate the source of infection, release biomarkers from the infection, and mobility of the biomarkers. 
 The modules also enable communication between biomarkers and on-body gateways through a network device. It further facilitates interactions with nanobots.
 
 
