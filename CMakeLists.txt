@@ -14,7 +14,8 @@ build_lib(
     Biomarker.cc
     BiomarkerChannel.cc
     BiomarkerNetDevice.cc
-    PrintBiomarkers.cc     
+    PrintBiomarkers.cc 
+    Randomizer.cc 	    
 	
    
   HEADER_FILES Bloodvessel.h
@@ -31,6 +32,7 @@ build_lib(
     BiomarkerChannel.h
     BiomarkerNetDevice.h
     PrintBiomarkers.h
+    Randomizer.h 
 
   
   LIBRARIES_TO_LINK
