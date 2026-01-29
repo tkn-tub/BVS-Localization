@@ -1,0 +1,176 @@
+= Blood Voyager Simulator for Network - BVS-Net: An ns-3 Extension to Simulate Communication in Human Cardiovascular System
+Laurenz Ebner <ebnerlaurenz@gmail.com>
+v2.1, 2024-02-12
+
+Blood Voyager Simulator for Network
+
+
+== Introduction
+
+Existing code: https://github.com/RegineWendt/blood-voyager-s
+Regine Wendt <wendt@itm.uni-luebeck.de>
+v1.1, 2019-04-24
+
+BVS is a ns-3 module that simulates the global movement of objects in the human body. It’s main purpose is to model the work environment of medical nanobots. The simulation of nanobots in their working environment is crucial to promote their application in the medical context. Several simulators for nanonetworks investigate new communication paradigms at nanoscale. However, the influence of the environment, namely the human body, on the movement and communication of nanobots was rarely considered so far. Currently there are three open-source nanonetwork ns-3 extension, namely https://telematics.poliba.it/index.php?option=com_content&view=article&id=30&Itemid=204&lang=en[NanoSim], https://github.com/ieee-p1906-1-reference-code/p1906-dev[p1906] and https://ubnano.tech/nano_downloads/terasim/[TeraSim] that are readily usable. We propose the combination of one of those, or your own nanonetwork simulators with BVS. Our simulator is in a prototypical state at the moment and we’re consistently working on it’s development. At the moment it features a simplified model of a human body’s cardiovascular system to simulate the nanobots’ mobility. Feel free to use BVS and contact us for any remark or contribute to our code. Be sure to have also read our paper describing it.
+
+BVS v2.1 introduces the possibility to model the communication channel, between the nanobots and the gateways, which would in real apllications be situated at the skin level and is in simulation a synthetic data generator for database usage. The mobility model is left unchanged, but we added multiple modules to measure, transmit and receive data. 
+
+If you are looking for a way to visualize the mobility part of the simulation results please visit the extended github for BVS-VIS. 
+
+
+== New Features
+ 
+  - Models a terahertz channel transmission between nanobots and gateway 
+  - Outputs the received packages into a csv file (gateway.csv)
+  - Calculates the bit error and package error rate per transmission (gateway_ber.csv)
+  - Possibility to have a single run or a multi parameter sweep with respect to tissue thickness.
+
+
+== Existing features
+    
+  - 3D coordinates of major vessels and organs
+  - Simulates permanent movement of nanobots in cardiovascular system
+  - Injection of nanobots in specific vessels
+  - Provides global position data of nanobots (/ns-3.2x/csvNano.csv)
+  - easy data analysis with provided MATLAB files 
+  
+== New Parameters
+
+  - tissue thickness
+  - Size of symbols of one transmitted package: TESTPACKETSIZE 200
+  - transmission frequency: FREQ_THZ 0.5*10^12
+  - initial distance between nanobot and gateway: DIST_INIT 850*10^-6
+  - initial thickness of skin: SKIN_THICKNESS 76*10^-6
+  - initial thickness of blood vessel: VESSEL_THICKNESS 200*10^-6
+  - initial transmit power: POWER 4*10^3
+  - structure of output packet:
+  -- struct MAC_PHY_DATA
+
+        int nanobot_ID; // ID of nanobot
+
+        int tissue_ID; // ID of body part where to measure 
+        
+        vector<int> PDU_TX; // Bit stream of measurement data at nanobot
+
+        vector<double> SEQ_TX; // Amplitude stream of measurement data send at nanobot
+
+        vector<double> SEQ_RX; // Amplitude stream of measurement data received at gateway
+
+        vector<int> PDU_RX; // decoded bit stream of measurement data at gateway
+	
+	
+== Existing parameters
+
+  - Number of nanobots `m_numberOfNanobots`
+  - Injection vessel `m_injectionVessel [1-94]`
+  - Simulation duration in seconds `m_simulationDuration`
+  - Duration between each simulation step `m_deltaT`
+  - Velocities: `m_arteryVelocity = 10 cm/s, m_veinVelocity = 3,7 cm/s, m_organVelocity = 1cm/s`
+  - Number of streams `m_numberOfStreams [1-5]`
+
+== Class overview
+.Process diagram of `test-blood-voyager-s`
+image::sequencediagram.pdf[Sequencediagram,890, width=80%]
+
+== Tutorial/Get started
+
+== Advised setup working with this code:
+
+	Windows: Visual Studio Code and WSL
+	Mac: Visual Studio Code
+	Linux: Visual Studio Code
+
+=== Detailed setup description:
+
+	install visual studio code
+	install Ubuntu 22.04.3 LTS
+	(optional) open Turn Windows features on or off, checkmark windows subsystems for linux, restart the PC
+	(optional) update the kernel component at https://wslstorestorage.blob.core.windows.net/wslblob/wsl_update_x64.msi
+	(optional) open Turn Windows features on or off, and activate Virtual Machine Platform Windows
+
+	Open Ubuntu 22.04.3 LTS and create and UNIX user in the prompt
+	in the WSL terminal run the code
+
+	install ns-3 with the commands following: (https://www.nsnam.com/2022/06/ns3-installation-in-ubuntu-2204.html, 4.3. Downloading ns-3 using Git in https://www.nsnam.org/docs/tutorial/html/getting-started.html#downloading-ns-3-using-git)
+
+	sudo apt update
+
+	sudo apt upgrade
+
+	sudo apt install g++ python3 python3-dev pkg-config sqlite3 cmake python3-setuptools git qtbase5-dev qtchooser qt5-qmake qtbase5-dev-tools gir1.2-goocanvas-2.0 python3-gi python3-gi-cairo python3-pygraphviz gir1.2-gtk-3.0 ipython3 openmpi-bin openmpi-common openmpi-doc libopenmpi-dev autoconf cvs bzr unrar gsl-bin libgsl-dev libgslcblas0 wireshark tcpdump sqlite sqlite3 libsqlite3-dev  libxml2 libxml2-dev libc6-dev libc6-dev-i386 libclang-dev llvm-dev automake python3-pip libxml2 libxml2-dev libboost-all-dev
+
+	wget https://www.nsnam.org/releases/ns-allinone-3.36.1.tar.bz2
+
+	tar jxvf ns-allinone-3.36.1.tar.bz2
+
+	cd ns-allinone-3.36.1/
+
+	./build.py --enable-examples --enable-tests
+
+	cd ns-3.36.1/
+
+	./ns3 run hello-simulator
+
+	Copy the BVS+Comm project and extract in \wsl.localhost\Ubuntu-22.04\home\jorge\ns-allinone-3.36.1\ns-3.36.1\src
+
+	Rename the folder with blood-voyager-s
+
+	Copy the "vasculature.csv" to \wsl.localhost\Ubuntu-22.04\home\jorge\ns-allinone-3.36.1\ns-3.36.1
+	The csv file is accesible in https://github.com/RegineWendt/blood-voyager-s/tree/master
+
+	for linking to Visual Studio run the command (code .) in the WSL terminal
+
+	When Visual Studio Opens, just install the add-on (WSL) that appears in the bottom corner window
+	In Visual Studio go to extentions (icon in the bar at left bar) and install C/C++
+
+	WSL installed a Linux partition in the PC
+
+	Open the terminal in Visual Studio in the tab View/Terminal
+	In the Visual studio terminal run the code
+
+	./ns3 clean
+	./ns3 configure --enable-examples --enable-tests
+	./ns3 configure start-bvs --enable-examples --enable-tests
+	./ns3 build start-bvs
+
+	whenever you update the code you run the code
+	./ns3 build start-bvs
+
+	For running BVS
+	./ns3 run start-bvs
+
+	The code can be accessed in explorer button and navigate to the main file in /home/jorge/ns-allinone-3.36.1/ns-3.36.1/src/blood-voyager-s/examples/start-blood-voyager-s.cc
+
+	Always Open Visual studio from the WSL terminal with the running (code .)
+
+=== You’ve already installed ns-3.40
+
+Take the blood-voyager-s version for ns-3.40 and copy the bvs folder in the !!!source location /src!!! of your ns3 version.
+
+=== You're new to ns-3
+
+You need to download the complete ns-3.40(or newer) and follow the instructions in this  https://www.nsnam.org/docs/tutorial/html/getting-started.html[ns-3 tutorial]. Then you download the blood-voyager-s folder from here and put it in the src folder. In addition, you need to put the vasculature.csv in your ns-3.x folder. For further instructions see "Run BVS".
+
+
+
+
+== Run BVS Version ns-3.40 or newer
+    SIMDURATION=   # simulation duration in seconds (default 500)
+    NUMOFNANOBOTS= # number of nanobots (default 100)
+    INJECTVESSEL=  # injection vessel [1-94] (default 29)
+	TYPEOFSIMULATION= # 0 is single run and 1 is sweep over vesselthickness (default 0)
+	GATEWAYPOSITION= # gateway position [1-94] (default 1)
+	TISSUE_ID = # tissue position, where to measure data [1-94] (default 94)
+	
+   
+	./ns3 run "start-bvs --simulationDuration=SIMDURATION, --numOfNanobots=NUMOFNANOBOTS, --injectionVessel=INJECTVESSEL, --typeofsimulation=TYPEOFSIMULATION, --gatewayposition=GATEWAYPOSITION, --tissue_ID=TISSUE_ID"
+    or with default values
+    ./ns3 run start-bvs
+    
+The simulation returns:
+	- a csv-file (/ns-3.40/csvNano.csv) with the position data of the simulated nanobots in every timestep. 
+	- a csv-file (/ns-3.40/gateway.csv) with the transmitted data of the simulated nanobots.
+	- a csv-file (/ns-3.40/gateway_ber.csv) with the calcualted ber and per of the simulated nanobots.
+
+== Appendix: Model
+image::Images/table1.pdf[Table,890, width=60%]
