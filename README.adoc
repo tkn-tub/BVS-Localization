@@ -194,5 +194,4 @@ The simulation returns:
 	- a csv-file (/ns-3.40/gateway.csv) with the transmitted data of the simulated nanobots.
 	- a csv-file (/ns-3.40/gateway_ber.csv) with the calcualted ber and per of the simulated nanobots.
 
-== Appendix: Model
-image::Images/table1.pdf[Table,890, width=60%]
+
